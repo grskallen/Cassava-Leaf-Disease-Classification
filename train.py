@@ -2,17 +2,18 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, random_split
 from load_data import load_train, BuildDataset, TestDataset
+from load_data import data_aug
 from torch.utils.tensorboard import SummaryWriter
 import time
-from torch.optim.lr_scheduler import CosineAnnealingLR
 import torchvision.models as models
+from torchvision import transforms
 
-#
 
 data_root = './dataset/'
 train_data = data_root + 'train_images'
 img_id, labels = load_train(data_root)
-dataset = BuildDataset(file_paths=train_data, labels=labels, img_id=img_id)
+
+dataset = BuildDataset(file_paths=train_data, labels=labels, img_id=img_id, transform=data_aug())
 
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
@@ -24,13 +25,13 @@ train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
 test = TestDataset(data_root + 'test_images')
 
-batch_size = 8
-batch_eval = 16
+batch_size = 32
+batch_eval = 64
 
 dataloader_train = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 dataloader_eval = torch.utils.data.DataLoader(val_dataset, batch_size=batch_eval, shuffle=False)
 
-model = models.resnet50(weights=None)
+model = models.resnet101(weights=None)
 model.to('cuda')
 
 transform = nn.Sequential(
@@ -38,16 +39,21 @@ transform = nn.Sequential(
     nn.Linear(64, 10),
     nn.Linear(10, 5)).cuda()
 
-loss_fn = nn.CrossEntropyLoss()
+loss_fn = nn.MultiMarginLoss()
 loss_fn = loss_fn.cuda()
-lr = 0.00001
-optimizer = torch.optim.Adam(list(model.parameters())+list(transform.parameters()), lr=lr)
+lr = 0.01
+optimizer = torch.optim.SGD(
+    params=[
+        {'params': list(model.parameters())},  # 模型参数
+        {'params': list(transform.parameters())}  # 变换参数
+    ],
+    lr=lr
+)
 
-epoch = 50
+scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.01)
+
+epoch = 300
 bar_length = 100
-T_max = 25
-eta_min = 0
-scheduler = CosineAnnealingLR(optimizer, T_max=T_max, eta_min=eta_min)
 
 writer = SummaryWriter('./log_train')
 
@@ -81,11 +87,11 @@ for i in range(epoch):
         remaining_time_minutes = int((remaining_time % 3600) // 60)
         remaining_time_seconds = int(remaining_time % 60)
 
-        remaining_time_formatted = f"{remaining_time_hours:02}:{remaining_time_minutes:02}:{remaining_time_seconds:02}" if total_train_step < 2140 else remaining_time_formatted = '00:00:00'
+        remaining_time_formatted = f"{remaining_time_hours:02}:{remaining_time_minutes:02}:{remaining_time_seconds:02}"
         print(f'\repoch_{i+1}: [{hashes:<{bar_length}}] {int(progress * 100)}% ({total_train_step}/{int(train_size/batch_size)+1})\
          eta：{remaining_time_formatted}', end='')
         if total_train_step % 100 == 0:
-            print(f"\nprocess：{total_train_step}/{int(train_size/batch_size)+1}，loss:{loss.item()}")
+            print(f"\nprocess：{total_train_step}/{int(train_size/batch_size)+1}，loss:{loss.item()}，lr:{optimizer.param_groups[0]['lr']}")
             writer.add_scalar(f'train_loss in epoch{i+1}', loss.item(), total_train_step)
     total_test_loss = 0
     total_accuracy = 0
@@ -108,3 +114,4 @@ for i in range(epoch):
 
     torch.save(model, f'./model/epoch_{i+1}.pth')
 writer.close()
+
