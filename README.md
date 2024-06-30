@@ -2,9 +2,6 @@
 This repository hosts the codebase for the "Cassava Leaf Disease Classification"  
 challenge hosted on Kaggle.  
 
-## News
-+ 2024/6/11 This is the first upload. This version is trained using only ResNet50, with approximately 8GB of GPU memory usage and an accuracy rate of over 65%. Subsequent updates will include code for data augmentation.
-
 ## Disclaimer  
 Please note that this code is not an official  
 release from Kaggle or any other authoritative entity.  
