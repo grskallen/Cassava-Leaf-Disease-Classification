@@ -6,7 +6,6 @@ from load_data import data_aug
 from torch.utils.tensorboard import SummaryWriter
 import time
 import torchvision.models as models
-from torchvision import transforms
 
 
 data_root = './dataset/'
