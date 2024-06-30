@@ -1,16 +1,12 @@
 # Cassava Leaf Disease Classification  
-This repository hosts the codebase for the "Cassava Leaf Disease Classification"  
-challenge hosted on Kaggle.  
+This repository hosts the codebase for the "Cassava Leaf Disease Classification" challenge hosted on Kaggle.  
 
 ## Disclaimer  
-Please note that this code is not an official  
-release from Kaggle or any other authoritative entity.  
+Please note that this code is not an official release from Kaggle or any other authoritative entity.  
   
-As the uploader is a novice, the code may contain imperfections  
-or lack refinement.  
+As the uploader is a novice, the code may contain imperfections or lack refinement.  
   
-I warmly invite all to contribute enhancements to this codebase and  
-if anyone encounters any issues, feel free to raise them here as an issue.  
+I warmly invite all to contribute enhancements to this codebase and if anyone encounters any issues, feel free to raise them here as an issue.  
   
 ## Implementation method
 **a. Create a conda virtual environment and activate it.**
