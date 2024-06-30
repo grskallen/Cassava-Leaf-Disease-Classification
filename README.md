@@ -28,5 +28,11 @@ pip install numpy==1.26.4 pandas==2.2.2 pillow==10.3.0
 ```
 **d. Train your model**
 ```
-python run_by_resnet50.py
+python train.py
 ```
+
+### Data Augmentation Note
+If you do not wish to use data augmentation, you can set `transform` to `None` in the `train.py` file. Without data augmentation, the accuracy will be between 65%-70%. However, with data augmentation enabled, the accuracy can exceed 80%.
+
+### Memory Usage Note
+When using data augmentation, the GPU memory usage remains below 5GB.
